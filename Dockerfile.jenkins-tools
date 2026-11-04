@@ -1,0 +1,35 @@
+FROM jenkins/jenkins:2.568.3
+
+USER root
+
+ARG TERRAFORM_VERSION=1.17.0
+ARG DOCKER_VERSION=29.7.2
+ARG BUILDX_VERSION=0.37.2
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl unzip \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    cd /tmp; \
+    curl -fsSLO "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"; \
+    curl -fsSLO "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS"; \
+    grep "terraform_${TERRAFORM_VERSION}_linux_amd64.zip" "terraform_${TERRAFORM_VERSION}_SHA256SUMS" | sha256sum -c -; \
+    unzip "terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -d /usr/local/bin; \
+    rm -f /tmp/terraform_*
+
+RUN set -eux; \
+    cd /tmp; \
+    curl -fsSLO "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz"; \
+    tar -xzf "docker-${DOCKER_VERSION}.tgz"; \
+    install -m 0755 docker/docker /usr/local/bin/docker; \
+    rm -rf /tmp/docker /tmp/docker-${DOCKER_VERSION}.tgz
+
+RUN set -eux; \
+    mkdir -p /usr/local/libexec/docker/cli-plugins; \
+    curl -fsSL "https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-amd64" \
+      -o /usr/local/libexec/docker/cli-plugins/docker-buildx; \
+    echo "982ca20490b45ed1ec8d99795974d3d874a358f75938c9c237305010e6b7e548  /usr/local/libexec/docker/cli-plugins/docker-buildx" | sha256sum -c -; \
+    chmod 0755 /usr/local/libexec/docker/cli-plugins/docker-buildx
+
+USER jenkins

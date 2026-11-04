@@ -51,6 +51,13 @@ spec:
           image: yosramamdouh234/ivolve-app:v1
           ports:
             - containerPort: 3000
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 2Gi
           envFrom:
             - configMapRef:
                 name: ivolve-cm
