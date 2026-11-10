@@ -48,7 +48,7 @@ spec:
               mysql -h "$DB_HOST" -u root -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES;"
       containers:
         - name: app
-          image: yosramamdouh234/ivolve-app:v1
+          image: yosramamdouh234/ivolve-app:6
           ports:
             - containerPort: 3000
           resources:
